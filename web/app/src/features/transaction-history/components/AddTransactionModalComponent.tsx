@@ -15,17 +15,28 @@ import { useUser } from "../../../context/UserContext.tsx";
 import { NatureDropdown } from "../../../components/RevolvingFundDropdown.tsx";
 import { Option } from "../../../types/RevolvingFundItems.ts";
 import { PaymentMethodSelector } from "../../../components/PaymentMethodSelector.tsx";
+import { SearchInput } from "../../../components/SearchInput.tsx";
+import { useClientDetails } from "../../../context/ClientDetailsContext.tsx";
+import { set } from "rsuite/esm/internals/utils/date/index";
+import { TextInput } from "../../../components/ui/TextInput.tsx";
 
 type AddTransactionModalProps = {
   onClose: () => void;
   onSave: () => void;
+  isPayorDetailsPage?: boolean;
   client?: ClientModel;
 };
 
-export function AddTransactionModal({ onClose, onSave, client }: AddTransactionModalProps) {
-  const [name, setName] = useState(client?.name || "");
-  const [isStudent, setIsStudent] = useState(client?.type === "non-student" ? false : true);
-  const [studentNumber, setStudentNumber] = useState(client?.studentInfo?.studentNumber || "");
+export function setNextORNumber(lastReferenceNumber: string) {
+  const nextNumber = (parseInt(lastReferenceNumber, 10) + 1).toString().padStart(lastReferenceNumber?.length, "0");
+  return nextNumber;
+}
+
+export function AddTransactionModal({ onClose, onSave, client, isPayorDetailsPage }: AddTransactionModalProps) {
+  const [clientInfo, setClientInfo] = useState<ClientModel | undefined>(client ? client : undefined);
+  const [name, setName] = useState(clientInfo?.name || "");
+  const [isStudent, setIsStudent] = useState(clientInfo?.type === "non-student" ? false : true);
+  const [studentNumber, setStudentNumber] = useState(clientInfo?.studentInfo?.studentNumber || "");
   const [date, setDate] = useState(formattedDisplayDateToday());
   const [college, setCollege] = useState("");
   const [collections, setCollections] = useState<{ amount: number; name: string }[]>([]);
@@ -35,12 +46,15 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
   const [showGenerateReceiptModal, setShowGenerateReceiptModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetails>();
   const { user } = useUser();
+  const { getClientDetails } = useClientDetails();
   const [selectedNature, setSelectedNature] = useState<Option | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
 
   useEffect(() => {
     getLastReferenceNumber().then(setLastReferenceNumber);
-  }, []);
+    const nextNumber = setNextORNumber(lastReferenceNumber);
+    setORNumber(nextNumber);
+  }, [lastReferenceNumber]);
 
   const handleGenerateReceipt = () => {
     setShowGenerateReceiptModal(true);
@@ -51,7 +65,7 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
   const handleSaveTransaction = () => {
     //create Client Object
     const newClient: ClientModel = {
-      id: client?.id || undefined,
+      id: clientInfo?.id || undefined,
       name: name,
       type: isStudent ? "student" : "non-student",
       studentInfo: isStudent ? { studentNumber, college } : undefined,
@@ -112,13 +126,26 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
   const handleChangePaymentMethod = (paymentMethod: string) => {
     setPaymentMethod(paymentMethod);
   };
+
+  const handleAddClientDetails = async (clientId: string) => {
+    const client = await getClientDetails(clientId);
+    console.log("Client details:", client.name);
+
+    // If getClientDetails returns an array, pick the first item; otherwise, use as is
+    setClientInfo(client);
+    setName(client.name);
+    setIsStudent(client.type === "non-student" ? false : true);
+    setStudentNumber(client.studentInfo?.studentNumber || "");
+    setCollege(client.studentInfo?.college || "");
+  };
+
   return (
     <>
       <CustomModal onClose={onClose} className="w-full max-w-2xl max-h-screen overflow-y-auto">
         <h3 className="text-xl font-semibold mb-4">Add New Transaction</h3>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Date</label>
-          <input
+          <TextInput
             type="text"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -126,12 +153,20 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Name</label>
-          <input
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          {!isPayorDetailsPage && (
+            <>
+              <SearchInput isHeader={false} onClick={(clientId) => handleAddClientDetails(clientId)} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">or Create New Payor</label>
+            </>
+          )}
+
+          <TextInput
+            placeholder="Enter Name of New Payor"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+            className="mt-3 block w-full border border-gray-300 rounded-md shadow-sm"
           />
         </div>
         <div className="flex mb-4">
@@ -148,7 +183,8 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
           <>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Student Number</label>
-              <input
+              <TextInput
+                placeholder="Enter Student Number"
                 type="text"
                 value={studentNumber}
                 onChange={(e) => setStudentNumber(e.target.value)}
@@ -195,7 +231,7 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700">Amount</label>
-              <input
+              <TextInput
                 type="number"
                 value={isNaN(parseFloat(collection.amount.toString())) ? "" : collection.amount}
                 onChange={(e) => handleCollectionChange(index, "amount", e.target.value)}
@@ -217,10 +253,23 @@ export function AddTransactionModal({ onClose, onSave, client }: AddTransactionM
           <PaymentMethodSelector onPaymentMethodChange={handleChangePaymentMethod} />
         </div>
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">
-            Ref/OR No (Last Ref/OR No: {lastReferenceNumber} )
-          </label>
-          <input
+          <div className="flex items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Ref/OR No (Last Ref/OR No: {lastReferenceNumber} )
+            </label>
+            <CustomButton
+              variant="ghost"
+              className="text-sm font-bold ml-1 text-up_green"
+              onClick={() => {
+                const nextNumber = setNextORNumber(lastReferenceNumber);
+                setORNumber(nextNumber);
+              }}
+            >
+              Next OR Number: {setNextORNumber(lastReferenceNumber)}
+            </CustomButton>
+          </div>
+          <TextInput
+            placeholder="Enter OR Number"
             type="text"
             value={ORNumber}
             onChange={(e) => setORNumber(e.target.value)}

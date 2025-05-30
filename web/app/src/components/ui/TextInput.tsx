@@ -8,9 +8,11 @@ interface TextInputProps {
   className?: string;
   readOnly?: boolean;
   name?: string;
+  id?: string;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
+  id,
   value,
   onChange,
   placeholder = "",
@@ -21,6 +23,7 @@ export const TextInput: React.FC<TextInputProps> = ({
 }) => {
   return (
     <input
+      id={id}
       readOnly={readOnly}
       type={type}
       value={value}

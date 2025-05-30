@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { CustomModal } from "../../../components/CustomModal";
-import { CustomButton } from "../../../components/ui/CustomButton";
-import { TextInput } from "../../../components/ui/TextInput";
-import { getDefaultQueueExpirationDuration, updateQueueExpirationDuration } from "../api/queueAPI";
-import { SuccessModal } from "../../../components/SuccessModal";
+import { CustomModal } from "../../../components/CustomModal.tsx";
+import { CustomButton } from "../../../components/ui/CustomButton.tsx";
+import { TextInput } from "../../../components/ui/TextInput.tsx";
+import { getDefaultQueueExpirationDuration, updateQueueExpirationDuration } from "../api/queueAPI.js";
+import { MessageModal } from "../../../components/SuccessModal.tsx";
 
 interface QueueSettingsModalProps {
   onClose: () => void;
@@ -21,13 +21,19 @@ export const QueueSettingsModal = ({ onClose }: QueueSettingsModalProps) => {
 
   const handleExpirationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
+
     if (!isNaN(value) && Number.isInteger(value)) {
       setDefaultExpiration(value);
     }
   };
 
-  const handleOnSave = () => {
-    updateQueueExpirationDuration(defaultExpiration).then(() => {
+  const handleOnSave = async () => {
+    const expirationValue = await defaultExpiration;
+    if (expirationValue < 1) {
+      alert("Default expiration must be at least 1 day");
+      return;
+    }
+    updateQueueExpirationDuration(expirationValue).then(() => {
       setShowSuccessModal(true);
     });
     console.log("Save default expiration");
@@ -56,7 +62,10 @@ export const QueueSettingsModal = ({ onClose }: QueueSettingsModalProps) => {
         </CustomButton>
       </div>
       {showSuccessModal && (
-        <SuccessModal message="Default Queue Duration has been successfully updated" onClose={onClose} />
+        <MessageModal
+          message="Default Queue Duration has been successfully updated! Please wait up to 1 hour to apply settings"
+          onClose={onClose}
+        />
       )}
     </CustomModal>
   );

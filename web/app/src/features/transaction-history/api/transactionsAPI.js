@@ -1,6 +1,6 @@
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { db } from "../../../services/firebase";
-import { encryptData, decryptData } from "../../../utils/encryption";
+import { db } from "../../../services/firebase.js";
+import { encryptData, decryptData } from "../../../utils/encryption.js";
 
 export const getTransactions = async (filter) => {
   try {

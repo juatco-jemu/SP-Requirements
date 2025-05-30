@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { CustomButton } from "../../../components/ui/CustomButton";
-import { CustomModal } from "../../../components/CustomModal";
+import { CustomButton } from "../../../components/ui/CustomButton.tsx";
+import { CustomModal } from "../../../components/CustomModal.tsx";
 import { CircleX } from "lucide-react";
-import { formattedDisplayDateToday } from "../../../utils/formatting";
-import { TextInput } from "../../../components/ui/TextInput";
+import { formatMoney, formattedDisplayDateToday } from "../../../utils/formatting.tsx";
+import { TextInput } from "../../../components/ui/TextInput.tsx";
 
 type CollectionDeposit = {
   amount: number;
@@ -14,6 +14,7 @@ type CollectionDeposit = {
 interface AddDepositsModalProps {
   collections: CollectionDeposit[];
   totalDeposits: number;
+  totalAmountCollected: number;
   onClose: () => void;
   onSave: (collections: CollectionDeposit[], totalDeposits: number) => void;
 }
@@ -21,6 +22,7 @@ interface AddDepositsModalProps {
 export function AddDepositsModal({
   collections: initialCollections,
   totalDeposits: initialDeposit,
+  totalAmountCollected,
   onSave,
   onClose,
 }: AddDepositsModalProps) {
@@ -67,11 +69,12 @@ export function AddDepositsModal({
     console.log("Add deposit");
     console.log(collections);
     onSave(collections, totalDeposits);
+    console.log("Total amount collected:", totalAmountCollected);
   };
 
   return (
     <>
-      <CustomModal onClose={onClose} className="w-full max-w-3xl">
+      <CustomModal onClose={onClose} className="w-full max-w-3xl max-h-[80vh] overflow-y-auto">
         <h3 className="text-xl font-semibold mb-4">Add Deposits</h3>
 
         {collections.map((collection, index) => (
@@ -111,10 +114,25 @@ export function AddDepositsModal({
           </div>
         ))}
         <div className="flex mb-4">
-          <div>
+          <div className="flex-1">
             <CustomButton onClick={handleAddDepositToCollection} variant="yellow">
               Add Deposit
             </CustomButton>
+
+            <div className="flex justify-between mt-4">
+              <p className="text-lg font-semibold">Total Undeposited Collection:</p>
+              <p className="text-lg font-bold">PHP {formatMoney(totalAmountCollected)}</p>
+            </div>
+
+            <div className="flex justify-between mt-1">
+              <p className="text-lg font-semibold">Current Deposit Sum:</p>
+              <p className="text-lg font-bold">PHP {formatMoney(totalDeposits)}</p>
+            </div>
+
+            <div className="flex justify-between mt-1">
+              <p className="text-lg font-semibold">Undeposited Collection, this report:</p>
+              <p className="text-lg font-bold">PHP {formatMoney(totalAmountCollected - totalDeposits)}</p>
+            </div>
           </div>
         </div>
 

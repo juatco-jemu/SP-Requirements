@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import logo_white from "../assets/images/uplb-logo-white-text.png";
-import { User, Search, ArrowLeft } from "lucide-react";
+import { User, Search, ArrowLeft, Sidebar } from "lucide-react";
 import { CustomButton } from "./ui/CustomButton.tsx";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,8 @@ import { clearDexieDatabase } from "../services/dexieDB.js";
 import { useUser } from "../context/UserContext.tsx";
 import { DropDownSettings } from "./DropdownSettings.tsx";
 import { SearchInput } from "./SearchInput.tsx";
+import ProfileSidebar from "./Sidebar.tsx";
+import { useClickOutside } from "../hooks/ClickOutside.js";
 
 interface PageHeaderProps {
   children?: React.ReactNode;
@@ -43,7 +45,7 @@ export function PageHeader({ children, userDisplayName, userDesignation, onLogou
         </a>
       </div>
 
-      <CustomButton onClick={() => clearDexieDatabase()}>Clear DB</CustomButton>
+      {/* <CustomButton onClick={() => clearDexieDatabase()}>Clear DB</CustomButton> */}
       {/* <CustomButton onClick={() => generateTableData()}>Populate DB</CustomButton> */}
 
       <form className={`gap-5 flex-grow justify-center ${showFullWidthSearch ? "flex" : "hidden md:flex"}`}>
@@ -59,7 +61,7 @@ export function PageHeader({ children, userDisplayName, userDesignation, onLogou
             </CustomButton>
           </div>
         )}
-        <SearchInput />
+        <SearchInput isHeader={true} clientName="" onClick={() => {}} />
       </form>
 
       <div className={`flex-shrink-0 md:gap-2 ${showFullWidthSearch ? "hidden" : "flex"}`}>
@@ -79,6 +81,7 @@ export function PageHeader({ children, userDisplayName, userDesignation, onLogou
           <User />
         </CustomButton>
       </div>
+
       {showModal && (
         <CustomModal2 onClose={() => setShowModal(false)} className="justify-end flex flex-col">
           <h3 className="text-xl font-semibold mb-4">
@@ -92,7 +95,7 @@ export function PageHeader({ children, userDisplayName, userDesignation, onLogou
             variant="default"
             className="bg-up_yellow mb-2 text-black hover:bg-up_yellow-hover"
           >
-            Dropdown Settings
+            Change Fund Code
           </CustomButton>
           <CustomButton
             onClick={handleLogout}
@@ -103,9 +106,10 @@ export function PageHeader({ children, userDisplayName, userDesignation, onLogou
           </CustomButton>
         </CustomModal2>
       )}
+
       {showDropdownSettings && (
         <CustomModal onClose={() => setShowDropdownSettings(false)} className="justify-end flex flex-col">
-          <DropDownSettings />
+          <DropDownSettings onClose={() => setShowDropdownSettings(false)} />
         </CustomModal>
       )}
     </div>

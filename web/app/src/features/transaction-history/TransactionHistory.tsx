@@ -194,7 +194,7 @@ export function TransactionHistory() {
           </CustomButton>
         </div>
         <div className="flex">
-          <CustomButton onClick={handleRefreshTransactions} variant="ghost" size="icon" className="mr-3">
+          <CustomButton onClick={handleFilter} variant="ghost" size="icon" className="mr-3">
             <RefreshCw />
           </CustomButton>
           <CustomButton variant="yellow" onClick={() => setShowAddTransactionModal(true)}>

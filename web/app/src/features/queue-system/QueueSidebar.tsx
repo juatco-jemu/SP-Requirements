@@ -9,6 +9,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Megaphone, Settings } from "luci
 import { QueueSettingsModal } from "./components/QueueSettingsModal.tsx";
 import { AnnouncementsModal } from "./components/AnnouncementModal.tsx";
 import { Timestamp } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 interface QueueItems {
   id: string;
@@ -25,6 +26,7 @@ interface QueueItems {
   createdAt: Timestamp;
   ticketNumber: string;
   transactionId: string;
+  tokens: string[];
 }
 
 export function QueueSidebar() {
@@ -35,8 +37,6 @@ export function QueueSidebar() {
   const [showQueueSettings, setShowQueueSettings] = useState(false);
   const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [pendingQueues, setPendingQueues] = useState(false);
-
-  const formattedQueuePrefix = formattedQueueNumber();
 
   useEffect(() => {
     // This will automatically update when the transactions are refreshed
@@ -49,6 +49,12 @@ export function QueueSidebar() {
   useEffect(() => {
     const unsubscribe = listenToQueue(yearMonthDate, (newQueue: React.SetStateAction<QueueItems[]>) => {
       setQueueList(newQueue); // Assuming newQueue is an array of queues
+      toast.success("New payment request arrived!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        pauseOnHover: true,
+      });
     });
 
     return () => unsubscribe();

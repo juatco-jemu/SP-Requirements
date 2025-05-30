@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { fetchCashierDetails } from "../services/authService";
-import { endCashierSession, startCashierSession } from "../services/dexieDB";
-// import { signInOffline } from "../services/authService"; // Ensure the correct paths to your authService
+import { fetchCashierDetails } from "../services/authService.js";
+import { endCashierSession, startCashierSession } from "../services/dexieDB.js";
+// import { signInOffline } from "../services/authService.js"; // Ensure the correct paths to your authService
 
 interface User {
   uid: string; // Firebase UID if online

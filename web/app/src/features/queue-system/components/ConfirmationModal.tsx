@@ -18,7 +18,7 @@ export function ConfirmationModal({ title, message, onCancel, onConfirm }: Confi
         <CustomButton variant="cancel" className="mt-4 px-4" onClick={onCancel}>
           No
         </CustomButton>
-        <CustomButton className="mt-4 px-4 bg-green-800 text-white" onClick={onConfirm}>
+        <CustomButton variant="green" className="mt-4 px-4" onClick={onConfirm}>
           Yes
         </CustomButton>
       </div>

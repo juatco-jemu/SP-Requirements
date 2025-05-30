@@ -1,19 +1,20 @@
 import React from "react";
-import { CustomModal } from "./CustomModal";
-import { CustomButton } from "./ui/CustomButton";
+import { CustomModal } from "./CustomModal.tsx";
+import { CustomButton } from "./ui/CustomButton.tsx";
 
-type SuccessModalProps = {
+type MessageModalProps = {
   onClose: () => void;
   message: string;
+  isError?: boolean;
 };
 
-export const SuccessModal: React.FC<SuccessModalProps> = ({ onClose, message }) => {
+export const MessageModal: React.FC<MessageModalProps> = ({ onClose, message, isError }) => {
   return (
     <CustomModal onClose={onClose}>
-      <h2 className="text-xl font-semibold mb-4">Success</h2>
+      <h2 className="text-xl font-semibold mb-4">{isError ? "Error" : "Success"}</h2>
       <p>{message}</p>
       <div className="flex justify-end mt-4">
-        <CustomButton variant="green" onClick={onClose}>
+        <CustomButton variant={isError ? "cancel" : "green"} onClick={onClose}>
           Close
         </CustomButton>
       </div>
