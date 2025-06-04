@@ -46,7 +46,7 @@ This project is developed in partial fulfillment of the requirements for the **S
 
 ## ⚙️ Technologies Used
 
-- **React + Vite + Tailwind CSS** (Web)
+- **React + Tailwind CSS** (Web)
 - **Flutter + Dart** (Mobile)
 - **Firebase** (Authentication, Firestore, Cloud Messaging)
 - **Dexie.js** (IndexedDB wrapper for offline persistence)
